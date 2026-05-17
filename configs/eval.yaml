@@ -1,0 +1,13 @@
+seed: 42
+device: cuda:0  # "cpu" | "cuda" | "cuda:0" | "cuda:1" | ...
+
+data:
+  root: ./dataset/STL10
+  num_workers: 4
+  batch_size: 64
+
+model:
+  num_classes: 10
+
+checkpoint: ./outputs/baseline/best_model.pt
+output_dir: ./outputs/baseline

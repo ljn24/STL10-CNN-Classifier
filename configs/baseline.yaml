@@ -1,0 +1,18 @@
+seed: 42
+device: cuda:0  # "cpu" | "cuda" | "cuda:0" | "cuda:1" | ...
+
+data:
+  root: ./dataset/STL10
+  num_workers: 4
+  val_ratio: 0.2
+
+model:
+  num_classes: 10
+
+train:
+  epochs: 50
+  batch_size: 64
+  lr: 0.001
+  weight_decay: 1.0e-4
+
+output_dir: ./outputs/baseline
