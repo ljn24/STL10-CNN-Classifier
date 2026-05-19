@@ -1,0 +1,25 @@
+seed: 42
+device: cuda:0
+model_type: advanced
+
+model:
+  use_residual: true
+  use_se: true
+
+data:
+  root: ./dataset/STL10
+  num_workers: 4
+  val_ratio: 0.2
+  batch_size: 64
+  augment: true
+
+train:
+  epochs: 150
+  lr: 0.001
+  weight_decay: 5.0e-4
+  optimizer: adamw
+  scheduler: cosine
+  label_smoothing: 0.05
+  cutmix_alpha: 0.5
+
+output_dir: ./outputs/advanced
