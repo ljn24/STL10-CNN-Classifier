@@ -16,11 +16,11 @@ import argparse
 import random
 from pathlib import Path
 
-import numpy as np
 import torch
+from matplotlib import pyplot as plt
 from torchvision.datasets import ImageFolder
 
-from src.dataset import IMAGENET_MEAN, IMAGENET_STD, _BASE_TRANSFORM
+from src.dataset import _BASE_TRANSFORM
 from src.model import build_model
 from src.utils import load_checkpoint, load_config, set_seed
 
@@ -60,31 +60,6 @@ def _pick_samples_per_class(
     }
 
 
-def _run_gradcam_on_indices(
-    gradcam: GradCAM,
-    dataset: ImageFolder,
-    indices: list[int],
-    device: torch.device,
-) -> list[dict]:
-    """Run Grad-CAM on a list of dataset indices and return result dicts."""
-    results = []
-    for idx in indices:
-        img_tensor, true_label = dataset[idx]
-        input_t = img_tensor.unsqueeze(0).to(device)
-        cam, pred_class, confidence = gradcam.generate(input_t)
-
-        results.append({
-            "index": idx,
-            "original": denormalize(img_tensor),
-            "cam": cam.cpu().numpy(),
-            "true_label": true_label,
-            "pred_label": pred_class,
-            "confidence": confidence,
-            "class_name": dataset.classes[true_label],
-        })
-    return results
-
-
 def generate_class_overview(
     cfg: dict,
     device: torch.device,
@@ -119,7 +94,7 @@ def generate_class_overview(
     fig = plot_class_overview(rows, title=f"Grad-CAM — {cfg['model_type'].title()} Model")
     path = output_dir / "class_overview.png"
     fig.savefig(path, dpi=150, bbox_inches="tight")
-    plt_close(fig)
+    plt.close(fig)
     print(f"  Saved {path}")
 
 
@@ -171,7 +146,7 @@ def generate_correct_vs_wrong(
     )
     path = output_dir / "correct_vs_wrong.png"
     fig.savefig(path, dpi=150, bbox_inches="tight")
-    plt_close(fig)
+    plt.close(fig)
     print(f"  Saved {path}")
 
 
@@ -196,15 +171,13 @@ def generate_model_comparison(
     rows = []
     for cls_idx in sorted(samples.keys()):
         idx = samples[cls_idx][0]
-        img_tensor, true_label = dataset[idx]
+        img_tensor, _ = dataset[idx]
         input_t = img_tensor.unsqueeze(0).to(device)
 
         cam_main, _, _ = gc_main.generate(input_t)
         cam_comp, _, _ = gc_comp.generate(input_t)
 
-        main_type = cfg_main["model_type"]
         comp_type = cfg_compare["model_type"]
-
         row = {
             "class_name": dataset.classes[cls_idx],
             "original": denormalize(img_tensor),
@@ -223,14 +196,8 @@ def generate_model_comparison(
     fig = plot_model_comparison(rows)
     path = output_dir / "model_comparison.png"
     fig.savefig(path, dpi=150, bbox_inches="tight")
-    plt_close(fig)
-    print(f"  Saved {path}")
-
-
-def plt_close(fig):
-    """Close a matplotlib figure to free memory."""
-    import matplotlib.pyplot as plt
     plt.close(fig)
+    print(f"  Saved {path}")
 
 
 def main() -> None:

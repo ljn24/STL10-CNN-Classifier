@@ -12,12 +12,8 @@ import json
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-import yaml
 
-
-def load_config(path: str) -> dict:
-    with open(path, encoding="utf-8") as f:
-        return yaml.safe_load(f)
+from src.utils import load_config
 
 
 def load_history(output_dir: Path) -> dict:
